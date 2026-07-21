@@ -76,6 +76,51 @@ $$
 - small SiPM channel 제외
 - 모든 US bar의 positive QDC를 event total에 포함
 
+#### Observable 정의의 근거
+
+선택된 event의 total US QDC는 다음과 같이 정의한다.
+
+\[
+Q_{\mathrm{US}}^{\mathrm{event}}
+=
+\sum_{\substack{\text{all US hits}\\
+\text{unmasked large-SiPM channels}\\
+QDC>0}}
+QDC
+\]
+
+- `system == 2`만 사용하여 분석 대상을 Upstream MuFilter로 한정한다.
+  Veto와 Downstream MuFilter는 구조와 readout 구성이 다르므로 함께 합산하지 않는다.
+
+- `mask=True`를 사용하여 dead, noisy 또는 분석에서 제외하도록 표시된 channel의
+  신호가 event total에 들어가는 것을 방지한다.
+
+- `positive=True`를 사용하여 pedestal subtraction이나 electronics fluctuation으로
+  발생할 수 있는 0 이하의 QDC를 제외한다. 여기서 positive는 입자의 전하 부호가
+  아니라 QDC 값이 양수라는 뜻이다.
+
+- `use_small_sipms=False`를 사용하여 large SiPM 신호만 합산한다.
+  Large SiPM과 small SiPM은 유효 면적, gain, 감도 및 포화 특성이 다르므로
+  calibration 없이 raw QDC를 직접 합산하면 일관된 물리량이 되지 않는다.
+  Small SiPM이 품질이 낮아서 제외하는 것은 아니다.
+
+- Bar 4/5 신호는 event selection에 사용하지만, selection을 통과한 event의
+  total QDC에는 모든 US bar를 포함한다. 이는 shower core뿐 아니라 인접 bar로
+  퍼진 lateral shower activity까지 측정하기 위함이다.
+
+따라서 bar 4/5 조건은 event selection이고, 모든 US bar의 QDC 합은 분석
+observable이다. 두 조건의 역할을 구분해야 한다.
+
+#### Validation items
+
+이 정의는 baseline Data–MC 비교에는 합리적이지만, 최종 물리 해석 전에는 다음을
+확인해야 한다.
+
+- 높은 광량에서 large SiPM saturation이 발생하는지
+- positive QDC만 합산하면서 Data의 pedestal noise가 양의 방향으로 누적되는지
+- Data와 MC에 channel mask와 detector-response model이 일관되게 적용되는지
+- 필요하다면 large-SiPM-only, small-SiPM-only 분포를 별도로 비교할 것
+
 ### 4.2 Channel response
 
 US1–US3의 bar 4와 5에서 channel별 mean positive QDC를 비교한다.
