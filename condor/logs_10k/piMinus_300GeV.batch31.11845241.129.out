@@ -1,0 +1,264 @@
+search libraries in slc9_x86-64
+Starting sample: piMinus_300GeV
+Batch: 031
+Particle ID: -211
+Energy: 300 GeV
+PGrunID: 31031
+Output directory: /eos/user/y/ykim/project_birkslaw/birks_samples_10k/piMinus_300GeV/batch_031
+SNDSW_ROOT: /afs/cern.ch/work/y/ykim/SNDBUILD/sw/rhel9_x86-64/sndsw/master-local1
+ROOT version: 6.36.04
+[INFO] Media file used: /afs/cern.ch/work/y/ykim/SNDBUILD/sw/rhel9_x86-64/sndsw/master-local1/geometry/media.geo
+
+************************************************************* 
+     initialisation for run id 1784583999
+************************************************************* 
+[WARN] FairGenericVMCConfig::Setup() Using gConfig.C macro DEPRACATED.
+[WARN] Check FairRoot/examples/common/gconfig/ for current YAML implementation.
+
+=============================================================
+ Virtual Monte Carlo Library
+ Version 2.0 ( 10 February 2022 )
+=============================================================
+
+=============================================================
+ Geant4 Virtual Monte Carlo 
+ Version 6.1 ( 17 March 2022 )
+ WWW : http://root.cern.ch/drupal/content/geant4-vmc
+=============================================================
+
+Running TVirtualMCApplication::ConstructGeometry
+isMaster=1
+
+**************************************************************
+ Geant4 version Name: geant4-11-01    (9-December-2022)
+                       Copyright : Geant4 Collaboration
+                      References : NIM A 506 (2003), 250-303
+                                 : IEEE-TNS 53 (2006), 270-278
+                                 : NIM A 835 (2016), 186-225
+                             WWW : http://geant4.org/
+**************************************************************
+
+===> GEANT4 materials created and mapped to TGeo ones...
+===> GEANT4 physical volumes created and mapped to TGeo hierarchy...
+### INFO: TG4RootDetectorConstruction::Construct() finished
+TG4PostDetConstruction::Initialize
+G4 Stat: instantiated 40 logical volumes 
+                      6830 physical volumes
+Adding HadronPhysicsList FTFP_BERT_HP_EMZ
+G4PhysListFactory::GetReferencePhysList <FTFP_BERT_HP_EMZ>  EMoption= 4
+<<< Geant4 Physics List simulation engine: FTFP_BERT_HP
+
+G4VModularPhysicsList::ReplacePhysics: G4EmStandard with type : 2 is replaced with G4EmStandard_opt4
+
+Adding SpecialPhysicsList stepLimiter+specialCuts+
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.309      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change: 16 Feb 2023  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 20 Jul 2026 at 23:46:55    |  | 
+ |  |                                                                              |  | 
+ |  |   Program documentation and an archive of historic versions is found on:     |  | 
+ |  |                                                                              |  | 
+ |  |                               https://pythia.org/                            |  | 
+ |  |                                                                              |  | 
+ |  |   PYTHIA is authored by a collaboration consisting of:                       |  | 
+ |  |                                                                              |  | 
+ |  |   Christian Bierlich, Nishita Desai, Leif Gellersen, Ilkka Helenius, Philip  |  | 
+ |  |   Ilten, Leif Lonnblad, Stephen Mrenna, Stefan Prestel, Christian Preuss,    |  | 
+ |  |   Torbjorn Sjostrand, Peter Skands, Marius Utheim and Rob Verheyen.          |  | 
+ |  |                                                                              |  | 
+ |  |   The complete list of authors, including contact information and            |  | 
+ |  |   affiliations, can be found on https://pythia.org/.                         |  | 
+ |  |   Problems or bugs should be reported on email at authors@pythia.org.        |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is C. Bierlich et al,                           |  | 
+ |  |   'A comprehensive guide to the physics and usage of Pythia 8.3',            |  | 
+ |  |   SciPost Phys. Codebases 8-r8.3 (2022) [arXiv:2203.11601 [hep-ph]]          |  | 
+ |  |                                                                              |  | 
+ |  |   PYTHIA is released under the GNU General Public Licence version 2 or later.|  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2023 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide p+ with p+ at a CM energy of 1.400e+04 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | A B -> A B elastic                             102 |   2.258e+01 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Multiparton Interactions Initialization  ---------* 
+ |                                                                  | 
+ |                   sigmaNonDiffractive =    57.17 mb              | 
+ |                                                                  | 
+ |    pT0 =  2.65 gives sigmaInteraction =   328.46 mb: accepted    | 
+ |                                                                  | 
+ *-------  End PYTHIA Multiparton Interactions Initialization  -----* 
+
+ *-------  PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec + WVec Settings (changes only)  ------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | SoftQCD:elastic                               |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec + WVec Settings  -----------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+ no particle data has been changed from its default value 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+DecayConfigPy8 macro: setting heavy flavour decays via Pythia8
+DecayConfigPy8 macro: setting other decays (short-lived and tau) via Pythia8
+### TG4SpecialControlsV2 constructed
+Visualization Manager instantiating with verbosity "warnings (3)"...
+ -I g4Config() using g4conf  macro: /afs/cern.ch/work/y/ykim/SNDBUILD/sw/rhel9_x86-64/sndsw/master-local1/gconfig/g4config.in
+SetCuts Macro: Setting Processes..
+SetCuts Macro: No cuts to be set in here.
+TG4RootDetectorConstruction::ConstructSDandField
+TG4PostDetConstruction::InitializeSDandField
+### INFO: TG4RootDetectorConstruction::ConstructSDandField finished
+The cross section for GammaConversionToMuons is artificially increased by the CrossSecFactor=1
+TG4ComposedPhysicsList::ConstructProcess done
+Available UI session types: [ tcsh, csh ]
+
+**********************************************
+    GEANT4 Geometry statistics: 
+             40 logical volumes
+           6830 physical volumes
+             20 materials
+              7 user limits
+             40 sensitive detectors
+**********************************************
+
+
+GammaToMuPair:  gamma->mu+mu- Bethe Heitler process, SubType= 15
+        good cross section parametrization from 211.317 MeV to 1e+12 GeV for all Z.
+
+AnnihiToMuPair:  e+e->mu+mu- annihilation, atomic e- at rest, SubType=6
+        threshold at 43.6931 GeV good description up to 1000 TeV for all Z.
+
+AnnihiToTauPair:  e+e->tau+tau- annihilation, atomic e- at rest, SubType=18
+        threshold at 12357.1 GeV good description up to 1000 TeV for all Z.
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.11161 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.43165 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.01142 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.37948 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.66716 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.10057 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.0437 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.32349 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.3754 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=3.20566 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.03079 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.23827 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.18383 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=1.13011 > 1
+G4GammaConversionToMuons::PostStepDoIt WARNING: in dSigxPlusGen, result=4.74947 > 1
+---------------------------------------------------------------------------
+FairBaseContFact:  Factory for parameter containers in libSts
+---------------------------------------------------------------------------
+FairBaseParSet	class for parameter io
+     actual context:  DefaultContext
+FairGeoParSet	class for Geo parameter
+     actual context:  DefaultContext
+---------------------------------------------------------------------------
+EmulsionDetContFact:  Factory for parameter containers in libBOxSensitive
+---------------------------------------------------------------------------
+FairGeoBoxSensitivePar	BoxSensitive Geometry Parameters
+  all contexts:
+     TestDefaultContext	 default
+     TestNonDefaultContext
+--------------------------------------------------------------------------------
+--------------  actual containers in runtime database  -------------------------
+FairBaseParSet                                 class for parameter io
+FairGeoParSet                                  class for Geo parameter
+--------------  runs, versions  ------------------------------------------------
+run id
+  container                                        1st-inp    2nd-inp    output
+run: 1784583999
+  FairBaseParSet                                1784583999         -1          1
+  FairGeoParSet                                 1784583999         -1          1
+--------------  input/output  --------------------------------------------------
+first input: none
+second input: none
+output:
+OBJ: FairParRootFile	/eos/user/y/ykim/project_birkslaw/birks_samples_10k/piMinus_300GeV/batch_031/ship.params.PG_-211-TGeant4.root	 : 0 at: 0x56336f1f09c0
+Root file I/O /eos/user/y/ykim/project_birkslaw/birks_samples_10k/piMinus_300GeV/batch_031/ship.params.PG_-211-TGeant4.root is open
+detector I/Os:  FairGenericParIo
+SND@LHC setup for PG to produce 100 events
+===> Setting particle gun sources starting at (x1,y1,z1)=(-38.0,44.0,310.0)[cm × cm × cm] 
+with a uniform x-y spread of (Dx,Dy)=(None,None)[cm × cm] and None z slices in steps of None[cm].
+ 
+Macro finished succesfully.
+Output file is  /eos/user/y/ykim/project_birkslaw/birks_samples_10k/piMinus_300GeV/batch_031/sndLHC.PG_-211-TGeant4.root
+Geometry file is  /eos/user/y/ykim/project_birkslaw/birks_samples_10k/piMinus_300GeV/batch_031/geofile_full.PG_-211-TGeant4.root
+Real time  2253.8260431289673  s, CPU time  2214.3 s
+Exit normally
+[INFO] The input consists out of the following trees and files: 
+[INFO]  - cbmsim
+[INFO]     - root://eoshome-y.cern.ch//eos/user/y/ykim/project_birkslaw/birks_samples_10k/piMinus_300GeV/batch_031/sndLHC.PG_-211-TGeant4.root
+[INFO] FairRootFileSink initialized.
+[INFO]  - cbmout
+[INFO]     - sndLHC.PG_-211-TGeant4_digCPP.root
+[INFO] Parameter and input file are available, Assure that basic info is there for the run!
+[INFO] ---FairRootManager::SpecifyRunId --- 
+[INFO] --- Initialize with RunId  --- 31031
+
+************************************************************* 
+     initialisation for run id 31031
+************************************************************* 
+-I- FairRunTimeDB::InitContainer() FairGeoParSet
+[ERROR] init() FairGeoParSet not initialized
+-I- FairRunTimeDB::InitContainer() FairBaseParSet
+[ERROR] init() FairBaseParSet not initialized
+[ERROR] FairRunAna::Init: fRtdb->initContainers failed
+
+************************************************************* 
+     initialisation for run id 31031
+************************************************************* 
+-I- FairRunTimeDB::InitContainer() FairGeoParSet
+[ERROR] init() FairGeoParSet not initialized
+-I- FairRunTimeDB::InitContainer() FairBaseParSet
+[ERROR] init() FairBaseParSet not initialized
+[ERROR] FairRunAna::Init: fRtdb->initContainers failed
+[INFO] MCEventHeader. branch is found
+[INFO] FairRunAna::Run() After checking, the run will run from event 0 to 100.
+using geofile: geofile_full.PG_-211-TGeant4.root
+ 
+Real time  40.22636318206787  s, CPU time  38.67 s
+Exit normally
+Completed sample: piMinus_300GeV
+Completed batch: 031
+total 97M
+-rw-r--r--. 1 ykim sndlhc-cg 140K Jul 21 00:24 geofile_full.PG_-211-TGeant4.root
+-rw-r--r--. 1 ykim sndlhc-cg 137K Jul 21 00:24 ship.params.PG_-211-TGeant4.root
+-rw-r--r--. 1 ykim sndlhc-cg  55M Jul 21 00:24 sndLHC.PG_-211-TGeant4_digCPP.root
+-rw-r--r--. 1 ykim sndlhc-cg  42M Jul 21 00:24 sndLHC.PG_-211-TGeant4.root

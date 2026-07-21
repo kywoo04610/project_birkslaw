@@ -1,0 +1,13 @@
+search libraries in slc9_x86-64
+==================================================
+Starting Birks MC production
+Sample:           piMinus_300GeV_15k
+Batch:            143
+Particle ID:      -211
+Energy:           300 GeV
+PGrunID:          32143
+Events:           100
+Output directory: /eos/user/y/ykim/project_birkslaw/birks_samples_15k/piMinus_300GeV_15k/batch_143
+SNDSW_ROOT:       /cvmfs/sndlhc.cern.ch/SNDLHC-2025/Oct7//sw//slc9_x86-64/sndsw/master-local1
+ROOT version:     6.36.04
+==================================================

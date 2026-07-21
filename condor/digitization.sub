@@ -1,0 +1,19 @@
+universe = vanilla
+
+executable = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/run_digitization.sh
+arguments  = $(pid) $(sample)
+
+output = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs/digi_$(sample).$(ClusterId).$(ProcId).out
+error  = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs/digi_$(sample).$(ClusterId).$(ProcId).err
+log    = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs/digitization.$(ClusterId).log
+
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 2GB
+
++JobFlavour = "microcentury"
+
+queue pid, sample from (
+211   piPlus_100GeV
+-211  piMinus_300GeV
+)

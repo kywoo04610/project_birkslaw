@@ -1,0 +1,19 @@
+universe = vanilla
+
+executable = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/run_birks_sample.sh
+arguments  = $(pid) $(energy) $(runid) $(sample)
+
+output = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs/$(sample).$(ClusterId).$(ProcId).out
+error  = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs/$(sample).$(ClusterId).$(ProcId).err
+log    = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs/birks.$(ClusterId).log
+
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 2GB
+
++JobFlavour = "workday"
+
+queue pid, energy, runid, sample from (
+211   100  1001  piPlus_100GeV
+-211  300  3001  piMinus_300GeV
+)

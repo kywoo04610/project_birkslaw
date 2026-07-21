@@ -1,0 +1,16 @@
+universe = vanilla
+
+executable = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/run_birks_15k.sh
+arguments  = $(pid) $(energy) $(runid) $(sample) $(batch)
+
+output = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_15k/$(sample).batch$(batch).$(ClusterId).$(ProcId).out
+error  = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_15k/$(sample).batch$(batch).$(ClusterId).$(ProcId).err
+log    = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_15k/birks_15k.$(ClusterId).log
+
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 2GB
+
++JobFlavour = "workday"
+
+queue pid, energy, runid, sample, batch from birks_jobs_15k.txt

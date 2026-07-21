@@ -1,0 +1,15 @@
+WARNING: not updating modulefiles
+Use alienv list to list loaded modules.
+Loading sndsw/latest-master-release
+  Loading requirement: BASE/1.0
+Info in <TGeoManager::CloseGeometry>: Geometry loaded from file...
+Info in <TGeoManager::SetTopVolume>: Top volume is cave. Master volume is cave
+Info in <TGeoNavigator::BuildCache>: --- Maximum geometry depth set to 100
+Info in <TGeoManager::Voxelize>: Voxelizing...
+Error in <TGeoVoxelFinder::SortAll>: Wrong bounding box for volume PlasticGlueAir
+Info in <TGeoManager::CountLevels>: max level = 7, max placements = 3300
+Info in <TGeoManager::CloseGeometry>: 105828 nodes/ 89 volume UID's in FAIR geometry
+Info in <TGeoManager::CloseGeometry>: ----------------modeler ready----------------
+Error in <FairRuntimeDb::initContainers()>: Error occured during initialization
+Error in <FairRuntimeDb::initContainers()>: Error occured during initialization
+TTree::Bronch:0: RuntimeWarning: Using split mode on a class: sndCluster with a custom Streamer

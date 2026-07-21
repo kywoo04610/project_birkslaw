@@ -1,0 +1,40 @@
+search libraries in slc9_x86-64
+Starting digitization: piPlus_100GeV
+Input: sndLHC.PG_211-TGeant4.root
+Geometry: geofile_full.PG_211-TGeant4.root
+ROOT version: 6.36.04
+[INFO] The input consists out of the following trees and files: 
+[INFO]  - cbmsim
+[INFO]     - sndLHC.PG_211-TGeant4.root
+[INFO] FairRootFileSink initialized.
+[INFO]  - cbmout
+[INFO]     - sndLHC.PG_211-TGeant4_digCPP.root
+[INFO] Parameter and input file are available, Assure that basic info is there for the run!
+[INFO] ---FairRootManager::SpecifyRunId --- 
+[INFO] --- Initialize with RunId  --- 1001
+
+************************************************************* 
+     initialisation for run id 1001
+************************************************************* 
+-I- FairRunTimeDB::InitContainer() FairGeoParSet
+[ERROR] init() FairGeoParSet not initialized
+-I- FairRunTimeDB::InitContainer() FairBaseParSet
+[ERROR] init() FairBaseParSet not initialized
+[ERROR] FairRunAna::Init: fRtdb->initContainers failed
+
+************************************************************* 
+     initialisation for run id 1001
+************************************************************* 
+-I- FairRunTimeDB::InitContainer() FairGeoParSet
+[ERROR] init() FairGeoParSet not initialized
+-I- FairRunTimeDB::InitContainer() FairBaseParSet
+[ERROR] init() FairBaseParSet not initialized
+[ERROR] FairRunAna::Init: fRtdb->initContainers failed
+[INFO] MCEventHeader. branch is found
+[INFO] FairRunAna::Run() After checking, the run will run from event 0 to 100.
+using geofile: geofile_full.PG_211-TGeant4.root
+ 
+Real time  23.9927179813385  s, CPU time  21.52 s
+Exit normally
+Completed digitization: piPlus_100GeV
+-rw-r--r--. 1 ykim sndlhc-cg 20M Jul 20 17:06 sndLHC.PG_211-TGeant4_digCPP.root

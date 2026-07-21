@@ -1,0 +1,6 @@
+WARNING: not updating modulefiles
+ERROR: sndsw/latest-master-release was not found
+Traceback (most recent call last):
+  File "/cvmfs/sndlhc.cern.ch/SNDLHC-2025/Oct7//sw//slc9_x86-64/sndsw/master-local1/shipLHC/run_simSND.py", line 7, in <module>
+    import shipunit as u
+ModuleNotFoundError: No module named 'shipunit'
