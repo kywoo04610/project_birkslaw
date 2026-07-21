@@ -25,13 +25,13 @@
 
 사용한 형태는 다음과 같다.
 
-$$
+```math
 E_{\mathrm{vis}} = \frac{E_{\mathrm{dep}}}{1 + k_1(dE/dx)_{\mathrm{mass}} + k_2(dE/dx)_{\mathrm{mass}}^2},
-$$
+```
 
-$$
+```math
 (dE/dx)_{\mathrm{mass}} = \frac{E_{\mathrm{dep}}/\mathrm{MeV}}{(\Delta x/\mathrm{cm})\rho}.
-$$
+```
 
 현재 적용 조건:
 
@@ -71,14 +71,14 @@ $$
 
 각 selected event에서 Upstream MuFilter 전체의 정상적인 positive large-SiPM QDC를 합산한다.
 
-$$
+```math
 Q_{\mathrm{US}}^{\mathrm{event}}
 =
 \sum_{\substack{\text{all US hits}\\
 \text{unmasked large-SiPM channels}\\
 QDC>0}}
 QDC.
-$$
+```
 
 코드에서는 `system == 2`인 MuFilter hit만 선택하고 다음 호출로 channel별 신호를 가져온다.
 
