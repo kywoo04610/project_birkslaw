@@ -69,57 +69,56 @@ $$
 
 ### 4.1 Event-by-event total US QDC
 
-각 selected event에서 Upstream MuFilter 전체의 positive large-SiPM QDC를 합산한다.
+각 selected event에서 Upstream MuFilter 전체의 정상적인 positive large-SiPM QDC를 합산한다.
 
-- `system == 2`인 MuFilter hit만 사용
-- `GetAllSignals(mask=True, positive=True, use_small_sipms=False)` 사용
-- small SiPM channel 제외
-- 모든 US bar의 positive QDC를 event total에 포함
-
-#### Observable 정의의 근거
-
-선택된 event의 total US QDC는 다음과 같이 정의한다.
-
-\[
+$$
 Q_{\mathrm{US}}^{\mathrm{event}}
 =
 \sum_{\substack{\text{all US hits}\\
 \text{unmasked large-SiPM channels}\\
 QDC>0}}
-QDC
-\]
+QDC.
+$$
 
-- `system == 2`만 사용하여 분석 대상을 Upstream MuFilter로 한정한다.
-  Veto와 Downstream MuFilter는 구조와 readout 구성이 다르므로 함께 합산하지 않는다.
+코드에서는 `system == 2`인 MuFilter hit만 선택하고 다음 호출로 channel별 신호를 가져온다.
 
-- `mask=True`를 사용하여 dead, noisy 또는 분석에서 제외하도록 표시된 channel의
-  신호가 event total에 들어가는 것을 방지한다.
+```python
+signals = hit.GetAllSignals(
+    mask=True,
+    positive=True,
+    use_small_sipms=False,
+)
+```
 
-- `positive=True`를 사용하여 pedestal subtraction이나 electronics fluctuation으로
-  발생할 수 있는 0 이하의 QDC를 제외한다. 여기서 positive는 입자의 전하 부호가
-  아니라 QDC 값이 양수라는 뜻이다.
+각 설정의 의미와 선택 근거는 다음과 같다.
 
-- `use_small_sipms=False`를 사용하여 large SiPM 신호만 합산한다.
-  Large SiPM과 small SiPM은 유효 면적, gain, 감도 및 포화 특성이 다르므로
-  calibration 없이 raw QDC를 직접 합산하면 일관된 물리량이 되지 않는다.
-  Small SiPM이 품질이 낮아서 제외하는 것은 아니다.
+- **`system == 2`: Upstream MuFilter만 사용**  
+  MuFilter의 Veto, Upstream(US), Downstream(DS)은 detector 구조와 readout 구성이 서로 다르다. 이번 연구의 대상은 absorber와 scintillator로 구성된 US에서 shower energy deposition 및 Birks quenching이 digitized QDC에 미치는 영향이므로, 다른 subsystem의 response를 섞지 않는다.
 
-- Bar 4/5 신호는 event selection에 사용하지만, selection을 통과한 event의
-  total QDC에는 모든 US bar를 포함한다. 이는 shower core뿐 아니라 인접 bar로
-  퍼진 lateral shower activity까지 측정하기 위함이다.
+- **`mask=True`: mask된 channel 제외**  
+  dead, noisy, 불안정하거나 calibration상 사용하지 않도록 표시된 channel을 제외한다. 비정상 channel을 많은 channel의 합인 event total에 포함하면 electronics artifact가 분포의 mean이나 tail을 왜곡할 수 있다.
 
-따라서 bar 4/5 조건은 event selection이고, 모든 US bar의 QDC 합은 분석
-observable이다. 두 조건의 역할을 구분해야 한다.
+- **`positive=True`: `QDC > 0`인 신호만 사용**  
+  여기서 `positive`는 입자의 전하 부호가 아니라 QDC 값의 부호를 뜻한다. Pedestal subtraction, electronics fluctuation, invalid value 등으로 생길 수 있는 0 이하의 값을 실제 scintillation light에 대응하는 합에서 제외한다.
 
-#### Validation items
+- **`use_small_sipms=False`: large SiPM만 사용**  
+  Small SiPM이 품질이 낮아서 제외하는 것은 아니다. Large SiPM과 small SiPM은 광을 받는 유효 면적, 감도, gain 및 saturation 특성이 다르다. Large SiPM은 약한 광신호에 더 민감하지만 높은 광량에서 더 일찍 포화될 수 있고, small SiPM은 신호가 작지만 더 큰 광량 범위에서 동작할 수 있다. 같은 scintillator light를 읽는 두 sensor의 raw QDC를 별도의 상대-response calibration 없이 단순 합산하면 동일한 물리 단위의 광량이 아니며 중복 계측까지 포함할 수 있다. 따라서 baseline observable은 한 종류로 통일된 large-SiPM-only QDC로 정의한다. README의 “small SiPM channel 제외”는 별도의 추가 cut이 아니라 이 option의 결과다.
 
-이 정의는 baseline Data–MC 비교에는 합리적이지만, 최종 물리 해석 전에는 다음을
-확인해야 한다.
+- **Selection 후에는 모든 US bar의 QDC를 합산**  
+  US1–US3의 bar 4 또는 5 신호는 beam/shower axis를 포함하는 event를 고르는 selection 조건이다. Event가 이 조건을 통과한 뒤에는 bar 4/5뿐 아니라 모든 US bar의 유효 신호를 total에 포함한다. Shower는 중심 bar에서 인접 bar로 횡방향으로 퍼지므로, 모든 bar를 더해야 core와 lateral shower activity를 함께 측정할 수 있다.
 
-- 높은 광량에서 large SiPM saturation이 발생하는지
-- positive QDC만 합산하면서 Data의 pedestal noise가 양의 방향으로 누적되는지
-- Data와 MC에 channel mask와 detector-response model이 일관되게 적용되는지
-- 필요하다면 large-SiPM-only, small-SiPM-only 분포를 별도로 비교할 것
+따라서 **bar 4/5 조건은 event selection**이고, **모든 US bar의 QDC 합은 선택된 event에 대해 측정하는 observable**이다. 두 조건의 역할을 구분해야 한다.
+
+#### 이 observable의 한계와 검증 항목
+
+이 정의는 Birks MC, No-Birks MC, Data에 동일하게 적용할 수 있는 합리적인 baseline이지만, 최종 물리 해석 전에는 다음을 확인해야 한다.
+
+- 높은 광량에서 large SiPM saturation이 QDC 분포, 특히 high-QDC tail을 왜곡하는지
+- `positive=True` 때문에 pedestal noise의 양의 fluctuation만 여러 channel에 걸쳐 누적되는지
+- Data와 MC에서 channel mask, noise 및 detector-response model이 일관되게 적용되는지
+- 필요하면 large-SiPM-only와 small-SiPM-only 분포를 별도로 만들고, 두 sensor를 결합할 경우 gain 및 상대 response를 보정한 뒤 결합할 것
+
+즉 Data–MC 차이는 Birks effect뿐 아니라 SiPM saturation, pedestal/noise, channel masking, gain 및 calibration 차이에서도 생길 수 있다. 이들을 확인하기 전에는 남은 차이를 Birks parameter 하나의 문제로 해석하지 않는다.
 
 ### 4.2 Channel response
 
@@ -383,4 +382,3 @@ python3 analyze_qdc_final.py \
 ## 18. Current bottom line
 
 Birks 구현은 MC total US QDC를 예상대로 감소시키며 과거 작은 표본에서는 data 방향으로 이동했다. 그러나 상당한 절대 scale 차이가 남고, 현재 대규모 비교는 Data sampling 편향 문제를 발견한 단계다. **다음 핵심 작업은 15k Birks 경로·cache 기능을 정리한 뒤, 전체 passing Data에서 재현 가능한 random 15,000개를 reservoir sampling하여 최종 비교를 다시 만드는 것**이다.
-
