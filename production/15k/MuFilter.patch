@@ -1,0 +1,94 @@
+diff --git a/shipLHC/MuFilter.cxx b/shipLHC/MuFilter.cxx
+index e8ef291fb..cc82c44c9 100644
+--- a/shipLHC/MuFilter.cxx
++++ b/shipLHC/MuFilter.cxx
+@@ -44,6 +44,7 @@
+ #include <iostream>                     // for operator<<, basic_ostream,etc
+ #include <string.h>
+ #include <cstring>
++#include <cmath>
+ 
+ using std::cout;
+ using std::endl;
+@@ -51,6 +52,68 @@ using std::to_string;
+ using std::string;
+ using namespace ShipUnit;
+ 
++namespace
++{
++Double_t BirksLaw()
++{
++    const Double_t energyDeposit = gMC->Edep();
++    if (energyDeposit <= 0.) return energyDeposit;
++
++    // Birks quenching applies only to charged particles.
++    const Double_t charge = gMC->TrackCharge();
++    if (charge == 0.) return energyDeposit;
++
++    // Avoid division by zero for a zero-length Monte Carlo step.
++    const Double_t stepLength = gMC->TrackStep();
++    if (stepLength <= 0.) return energyDeposit;
++
++    Float_t atomicMass;
++    Float_t atomicNumber;
++    Float_t density;
++    Float_t radiationLength;
++    Float_t absorptionLength;
++
++    gMC->CurrentMaterial(
++        atomicMass,
++        atomicNumber,
++        density,
++        radiationLength,
++        absorptionLength
++    );
++
++    if (density <= 0.) return energyDeposit;
++
++    // Provisional ATLAS TileCal constants.
++    constexpr Double_t birk1 = 0.02002;
++    constexpr Double_t birk2 = 0.0;
++
++    Double_t effectiveBirk1 = birk1;
++
++    // ATLAS correction for particles with |charge| > 1.
++    if (std::abs(charge) > 1.) {
++        effectiveBirk1 *= 7.2 / 12.6;
++    }
++
++    // Convert the VMC quantities to MeV and cm.
++    // density is supplied by CurrentMaterial() in g/cm^3.
++    const Double_t energyDepositMeV = energyDeposit / MeV;
++    const Double_t stepLengthCm = stepLength / cm;
++
++    // Mass stopping power: MeV cm^2 / g.
++    const Double_t dedx =
++        energyDepositMeV / (stepLengthCm * density);
++
++    const Double_t denominator =
++        1.0
++        + effectiveBirk1 * dedx
++        + birk2 * dedx * dedx;
++
++    if (denominator <= 0.) return energyDeposit;
++
++    return energyDeposit / denominator;
++}
++} // namespace
++
+ MuFilter::MuFilter()
+ : FairDetector("MuonFilter", "",kTRUE),
+   fTrackID(-1),
+@@ -485,8 +548,10 @@ Bool_t  MuFilter::ProcessHits(FairVolume* vol)
+ 		gMC->TrackPosition(fPos);
+ 		gMC->TrackMomentum(fMom);
+ 	}
+-	// Sum energy loss for all steps in the active volume
+-	fELoss += gMC->Edep();
++
++        // Sum the Birks-corrected visible energy for each step
++        // in the active scintillator volume.
++        fELoss += BirksLaw();
+ 
+ 	// Create MuFilterPoint at exit of active volume
+ 	if ( gMC->IsTrackExiting()    ||

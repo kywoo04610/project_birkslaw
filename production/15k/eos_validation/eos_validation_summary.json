@@ -1,0 +1,39 @@
+{
+  "base": "/eos/user/y/ykim/project_birkslaw/birks_samples_15k",
+  "expected_branch": "Digi_MuFilterHits",
+  "expected_entries_per_file": 100,
+  "expected_tree": "cbmsim",
+  "generated_at_utc": "2026-07-22T12:19:11.516697+00:00",
+  "overall_valid": true,
+  "samples": [
+    {
+      "discovered_batch_directories": 150,
+      "duplicate_file_candidates": [],
+      "expected_batches": 150,
+      "expected_entries": 15000,
+      "extra_batch_directories": [],
+      "invalid_files": 0,
+      "missing_batch_directories": [],
+      "sample": "piPlus_100GeV_15k",
+      "unrecognized_directories": [],
+      "valid_entries": 15000,
+      "valid_files": 150,
+      "validated": true
+    },
+    {
+      "discovered_batch_directories": 150,
+      "duplicate_file_candidates": [],
+      "expected_batches": 150,
+      "expected_entries": 15000,
+      "extra_batch_directories": [],
+      "invalid_files": 0,
+      "missing_batch_directories": [],
+      "sample": "piMinus_300GeV_15k",
+      "unrecognized_directories": [],
+      "valid_entries": 15000,
+      "valid_files": 150,
+      "validated": true
+    }
+  ],
+  "sha256_enabled": false
+}
