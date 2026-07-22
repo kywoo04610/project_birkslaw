@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 ENERGY="${1:?Usage: run_reservoir_analysis.sh 100GeV|300GeV}"
 
@@ -17,6 +17,7 @@ OUTPUT_DIR="$PROJECT_DIR/analysis/results_reservoir_full_${ENERGY}"
 source /cvmfs/sndlhc.cern.ch/SNDLHC-2025/Oct7/setUp.sh
 cd /afs/cern.ch/work/y/ykim/SNDBUILD
 eval "$(alienv load sndsw/latest-master-release --no-refresh)"
+set -u
 
 cd "$PROJECT_DIR"
 mkdir -p "$OUTPUT_DIR"
