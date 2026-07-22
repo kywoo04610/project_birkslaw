@@ -1,0 +1,19 @@
+universe = vanilla
+
+executable = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/run_reservoir_analysis.sh
+arguments  = $(energy)
+
+output = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_reservoir/reservoir_$(energy).$(ClusterId).$(ProcId).out
+error  = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_reservoir/reservoir_$(energy).$(ClusterId).$(ProcId).err
+log    = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_reservoir/reservoir.$(ClusterId).log
+
+request_cpus   = 1
+request_memory = 8GB
+request_disk   = 4GB
+
++JobFlavour = "nextweek"
+
+queue energy from (
+100GeV
+300GeV
+)
