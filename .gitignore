@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# HTCondor outputs
+condor/logs/
+condor/logs_*/
+*.out
+*.err
+*.log
+
+# Local analysis caches
+*.npz
+
+# Large generated ROOT outputs
+*.root
