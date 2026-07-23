@@ -18,3 +18,4 @@ analysis/results_reservoir_*/
 
 # HTCondor runtime credential artifact
 /ykim.cc
+analysis/results_full_data_normalized_*/

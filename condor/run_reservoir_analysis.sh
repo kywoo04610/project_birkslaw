@@ -39,6 +39,7 @@ python3 analysis/analyze_qdc_reservoir.py \
     --data-sampling reservoir \
     --random-seed 42 \
     --progress-every 100000 \
+    --cache-full-data \
     --output-dir "$OUTPUT_DIR"
 
 echo "Reservoir analysis completed: $(date --iso-8601=seconds)"
