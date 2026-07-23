@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from array import array
 from collections import defaultdict
 from glob import glob
 from pathlib import Path
@@ -188,6 +189,14 @@ def parse_arguments():
         action="store_true",
         help="Regenerate plots from --cache-file without scanning ROOT files.",
     )
+    parser.add_argument(
+        "--cache-full-data",
+        action="store_true",
+        help=(
+            "During a normal scan, retain compact arrays for every selected "
+            "Data event in addition to the comparison reservoir."
+        ),
+    )
     args = parser.parse_args()
 
     if args.max_events == 0 or args.max_events < -1:
@@ -204,6 +213,12 @@ def parse_arguments():
 
     if args.progress_every <= 0:
         parser.error("--progress-every must be a positive integer")
+
+    if args.cache_full_data and args.max_events < 0:
+        parser.error(
+            "--cache-full-data requires a positive --max-events for the "
+            "comparison reservoir"
+        )
 
     return args
 
@@ -246,6 +261,7 @@ def analyze_dataset(
     sampling_mode="first",
     random_seed=None,
     progress_every=100000,
+    collect_full_data=False,
 ):
     """Extract US QDC after the SciFi and US bar-4/5 selections."""
 
@@ -275,6 +291,13 @@ def analyze_dataset(
 
     retained_events = []
     rng = np.random.default_rng(random_seed) if sampling_mode == "reservoir" else None
+    full_total_us_qdc = array("d")
+    full_file_ids = array("H")
+    full_global_entries = array("q")
+    full_local_entries = array("q")
+    full_file_table = []
+    full_file_index = {}
+    full_channel_stats = defaultdict(lambda: [0, 0.0, 0.0])
 
     scanned_events = 0
     scifi_selected_events = 0
@@ -289,6 +312,7 @@ def analyze_dataset(
             sampling_mode == "first"
             and max_events > 0
             and len(retained_events) >= max_events
+            and not collect_full_data
         ):
             break
 
@@ -364,6 +388,27 @@ def analyze_dataset(
             "local_entry": local_entry,
         }
 
+        if collect_full_data:
+            if source_file not in full_file_index:
+                if len(full_file_table) >= np.iinfo(np.uint16).max:
+                    raise RuntimeError(
+                        "Too many input files for uint16 full-Data file IDs"
+                    )
+                full_file_index[source_file] = len(full_file_table)
+                full_file_table.append(source_file)
+
+            full_total_us_qdc.append(event_total)
+            full_file_ids.append(full_file_index[source_file])
+            full_global_entries.append(event_index)
+            full_local_entries.append(local_entry)
+
+            for channel_key, values in event_channel_qdc.items():
+                statistics = full_channel_stats[channel_key]
+                for value in values:
+                    statistics[0] += 1
+                    statistics[1] += value
+                    statistics[2] += value * value
+
         if max_events < 0 or len(retained_events) < max_events:
             retained_events.append(payload)
         elif sampling_mode == "reservoir":
@@ -400,6 +445,19 @@ def analyze_dataset(
             "prefix because --max-scanned-events is not -1."
         )
 
+    full_data = None
+    if collect_full_data:
+        full_data = {
+            "total_us_qdc": np.asarray(full_total_us_qdc, dtype=np.float64),
+            "file_id": np.asarray(full_file_ids, dtype=np.uint16),
+            "global_entry": np.asarray(
+                full_global_entries, dtype=np.int64
+            ),
+            "local_entry": np.asarray(full_local_entries, dtype=np.int64),
+            "file_table": full_file_table,
+            "channel_stats": dict(full_channel_stats),
+        }
+
     return {
         "available_events": available_events,
         "events": selected_events,
@@ -421,6 +479,7 @@ def analyze_dataset(
             }
             for event in retained_events
         ],
+        "full_data": full_data,
     }
 
 
@@ -694,6 +753,90 @@ def write_summary(all_results, output_dir):
                 )
 
 
+def write_full_data_summaries(all_results, output_dir):
+    """Write full selected-Data QDC and channel aggregate summaries."""
+
+    total_path = output_dir / "full_data_total_us_qdc_summary.csv"
+    channel_path = output_dir / "full_data_channel_summary.csv"
+
+    total_fields = [
+        "energy", "selected_events", "mean", "median", "std",
+        "q05", "q25", "q75", "q95",
+    ]
+    channel_fields = [
+        "energy", "plane", "bar", "channel", "positive_signals",
+        "mean_positive_qdc", "std_positive_qdc", "sem_positive_qdc",
+    ]
+
+    with total_path.open("w", newline="") as total_file, channel_path.open(
+        "w", newline=""
+    ) as channel_file:
+        total_writer = csv.DictWriter(
+            total_file, fieldnames=total_fields, lineterminator="\n"
+        )
+        channel_writer = csv.DictWriter(
+            channel_file, fieldnames=channel_fields, lineterminator="\n"
+        )
+        total_writer.writeheader()
+        channel_writer.writeheader()
+
+        for energy, results in all_results.items():
+            full_data = results["Data"].get("full_data")
+            if full_data is None:
+                continue
+
+            values = full_data["total_us_qdc"]
+            if len(values) > 0:
+                quantiles = np.quantile(
+                    values, [0.05, 0.25, 0.75, 0.95]
+                )
+                total_writer.writerow(
+                    {
+                        "energy": energy,
+                        "selected_events": len(values),
+                        "mean": float(np.mean(values)),
+                        "median": float(np.median(values)),
+                        "std": (
+                            float(np.std(values, ddof=1))
+                            if len(values) > 1 else 0.0
+                        ),
+                        "q05": float(quantiles[0]),
+                        "q25": float(quantiles[1]),
+                        "q75": float(quantiles[2]),
+                        "q95": float(quantiles[3]),
+                    }
+                )
+
+            for (plane, bar, channel), statistics in sorted(
+                full_data["channel_stats"].items()
+            ):
+                count, total, total_squared = statistics
+                mean = total / count if count else math.nan
+                if count > 1:
+                    variance = max(
+                        0.0,
+                        (total_squared - count * mean * mean) / (count - 1),
+                    )
+                    std = math.sqrt(variance)
+                    sem = std / math.sqrt(count)
+                else:
+                    std = 0.0 if count == 1 else math.nan
+                    sem = 0.0 if count == 1 else math.nan
+
+                channel_writer.writerow(
+                    {
+                        "energy": energy,
+                        "plane": plane,
+                        "bar": bar,
+                        "channel": channel,
+                        "positive_signals": count,
+                        "mean_positive_qdc": mean,
+                        "std_positive_qdc": std,
+                        "sem_positive_qdc": sem,
+                    }
+                )
+
+
 def write_sampling_provenance(all_results, output_dir):
     """Save the exact retained Data entries and sampling metadata."""
 
@@ -787,6 +930,29 @@ def save_plot_cache(all_results, metadata, cache_path):
                 "total_us_qdc_key": total_key,
                 "channel_qdc_keys": channel_keys,
             }
+
+            full_data = result.get("full_data")
+            if full_data is not None:
+                full_prefix = f"{prefix}_full_data"
+                full_array_keys = {}
+                for field in (
+                    "total_us_qdc", "file_id", "global_entry", "local_entry"
+                ):
+                    array_key = f"{full_prefix}_{field}"
+                    arrays[array_key] = np.asarray(full_data[field])
+                    full_array_keys[field] = array_key
+
+                energy_manifest[label]["full_data"] = {
+                    "array_keys": full_array_keys,
+                    "file_table": full_data["file_table"],
+                    "channel_stats": {
+                        ",".join(str(component) for component in channel_key):
+                            statistics
+                        for channel_key, statistics in sorted(
+                            full_data["channel_stats"].items()
+                        )
+                    },
+                }
         manifest["energies"][energy] = energy_manifest
 
     arrays["manifest_json"] = np.asarray(json.dumps(manifest, sort_keys=True))
@@ -830,6 +996,28 @@ def load_plot_cache(cache_path):
                     ),
                     "channel_qdc": channel_qdc,
                 }
+
+                full_manifest = sample_manifest.get("full_data")
+                if full_manifest is not None:
+                    array_keys = full_manifest["array_keys"]
+                    energy_results[label]["full_data"] = {
+                        field: np.asarray(cache[array_key])
+                        for field, array_key in array_keys.items()
+                    }
+                    energy_results[label]["full_data"]["file_table"] = (
+                        full_manifest["file_table"]
+                    )
+                    energy_results[label]["full_data"]["channel_stats"] = {
+                        tuple(
+                            int(component)
+                            for component in encoded_key.split(",")
+                        ): statistics
+                        for encoded_key, statistics in full_manifest[
+                            "channel_stats"
+                        ].items()
+                    }
+                else:
+                    energy_results[label]["full_data"] = None
             all_results[energy] = energy_results
 
     return all_results, manifest["metadata"]
@@ -856,6 +1044,7 @@ def main():
             plot_total_us_qdc(energy, cached_results[energy], args.output_dir)
             plot_channel_response(energy, cached_results[energy], args.output_dir)
 
+        write_full_data_summaries(cached_results, args.output_dir)
         print("\nCache-only plotting completed.")
         print(f"Cache loaded from: {cache_path}")
         print(f"Results saved in: {args.output_dir}")
@@ -893,6 +1082,7 @@ def main():
                 sampling_mode=sampling_mode,
                 random_seed=sample_seed,
                 progress_every=args.progress_every,
+                collect_full_data=is_data and args.cache_full_data,
             )
 
         all_results[energy] = energy_results
@@ -900,6 +1090,7 @@ def main():
         plot_channel_response(energy, energy_results, args.output_dir)
 
     write_summary(all_results, args.output_dir)
+    write_full_data_summaries(all_results, args.output_dir)
     write_file_check_summary(all_file_results, args.output_dir)
     sampling_metadata = write_sampling_provenance(all_results, args.output_dir)
     sampling_metadata["base_random_seed"] = args.random_seed
@@ -908,6 +1099,7 @@ def main():
     sampling_metadata["max_scanned_events"] = args.max_scanned_events
     sampling_metadata["energies"] = args.energies
     sampling_metadata["progress_every"] = args.progress_every
+    sampling_metadata["cache_full_data"] = args.cache_full_data
     save_plot_cache(all_results, sampling_metadata, cache_path)
     with (args.output_dir / "data_sampling_metadata.json").open("w") as json_file:
         json.dump(sampling_metadata, json_file, indent=2, sort_keys=True)
