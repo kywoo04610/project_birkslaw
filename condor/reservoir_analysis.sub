@@ -8,7 +8,7 @@ error  = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_reservoir/reservo
 log    = /afs/cern.ch/work/y/ykim/project_birkslaw/condor/logs_reservoir/reservoir.$(ClusterId).log
 
 request_cpus   = 1
-request_memory = 8GB
+request_memory = 3GB
 request_disk   = 4GB
 
 +JobFlavour = "nextweek"

@@ -15,3 +15,6 @@ condor/logs_*/
 # Large generated ROOT outputs
 *.root
 analysis/results_reservoir_*/
+
+# HTCondor runtime credential artifact
+/ykim.cc
