@@ -30,6 +30,8 @@ COLORS = {
     "Data": "black",
 }
 
+CACHE_FORMAT_VERSION = 1
+
 
 DATASETS = {
     "100GeV": {
@@ -170,6 +172,21 @@ def parse_arguments():
         type=int,
         default=100000,
         help="Print scan progress every N input entries (default: 100000).",
+    )
+    parser.add_argument(
+        "--cache-file",
+        type=Path,
+        default=None,
+        help=(
+            "Compressed NumPy cache path. A normal scan saves selected QDC "
+            "values here; --plot-only loads them without rescanning ROOT files. "
+            "Default: OUTPUT_DIR/qdc_plot_cache.npz"
+        ),
+    )
+    parser.add_argument(
+        "--plot-only",
+        action="store_true",
+        help="Regenerate plots from --cache-file without scanning ROOT files.",
     )
     args = parser.parse_args()
 
@@ -557,7 +574,7 @@ def plot_total_us_qdc(energy, results, output_dir):
 def mean_and_error(values):
     """Return mean and standard error."""
 
-    if not values:
+    if len(values) == 0:
         return math.nan, math.nan
 
     array = np.asarray(values, dtype=float)
@@ -736,10 +753,113 @@ def write_sampling_provenance(all_results, output_dir):
     return metadata
 
 
+def save_plot_cache(all_results, metadata, cache_path):
+    """Save selected total and channel QDC arrays for fast replotting."""
+
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    arrays = {}
+    manifest = {
+        "format_version": CACHE_FORMAT_VERSION,
+        "metadata": metadata,
+        "energies": {},
+    }
+
+    for energy_index, (energy, results) in enumerate(all_results.items()):
+        energy_manifest = {}
+        for sample_index, (label, result) in enumerate(results.items()):
+            prefix = f"e{energy_index}_s{sample_index}"
+            total_key = f"{prefix}_total_us_qdc"
+            arrays[total_key] = np.asarray(
+                result["total_us_qdc"], dtype=np.float64
+            )
+
+            channel_keys = {}
+            for channel_index, (channel_key, values) in enumerate(
+                sorted(result["channel_qdc"].items())
+            ):
+                array_key = f"{prefix}_channel_{channel_index}"
+                arrays[array_key] = np.asarray(values, dtype=np.float64)
+                channel_keys[
+                    ",".join(str(component) for component in channel_key)
+                ] = array_key
+
+            energy_manifest[label] = {
+                "total_us_qdc_key": total_key,
+                "channel_qdc_keys": channel_keys,
+            }
+        manifest["energies"][energy] = energy_manifest
+
+    arrays["manifest_json"] = np.asarray(json.dumps(manifest, sort_keys=True))
+    np.savez_compressed(cache_path, **arrays)
+    print(f"Plot cache saved in: {cache_path}")
+
+
+def load_plot_cache(cache_path):
+    """Load total and channel QDC arrays from a trusted NPZ cache."""
+
+    if not cache_path.is_file():
+        raise RuntimeError(f"Cache file does not exist: {cache_path}")
+
+    all_results = {}
+    with np.load(cache_path, allow_pickle=False) as cache:
+        manifest = json.loads(str(cache["manifest_json"].item()))
+        version = manifest.get("format_version")
+        if version != CACHE_FORMAT_VERSION:
+            raise RuntimeError(f"Unsupported cache format version: {version}")
+
+        for energy, energy_manifest in manifest["energies"].items():
+            energy_results = {}
+            for label in COLORS:
+                sample_manifest = energy_manifest[label]
+                channel_qdc = defaultdict(list)
+                for encoded_key, array_key in sample_manifest[
+                    "channel_qdc_keys"
+                ].items():
+                    plane, bar, channel = (
+                        int(component)
+                        for component in encoded_key.split(",")
+                    )
+                    channel_qdc[(plane, bar, channel)] = np.asarray(
+                        cache[array_key], dtype=np.float64
+                    )
+
+                energy_results[label] = {
+                    "total_us_qdc": np.asarray(
+                        cache[sample_manifest["total_us_qdc_key"]],
+                        dtype=np.float64,
+                    ),
+                    "channel_qdc": channel_qdc,
+                }
+            all_results[energy] = energy_results
+
+    return all_results, manifest["metadata"]
+
+
 def main():
     args = parse_arguments()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     ROOT.gROOT.SetBatch(True)
+
+    cache_path = (
+        args.cache_file
+        if args.cache_file is not None
+        else args.output_dir / "qdc_plot_cache.npz"
+    )
+
+    if args.plot_only:
+        cached_results, _ = load_plot_cache(cache_path)
+        for energy in args.energies:
+            if energy not in cached_results:
+                raise RuntimeError(
+                    f"Energy {energy} is not present in cache: {cache_path}"
+                )
+            plot_total_us_qdc(energy, cached_results[energy], args.output_dir)
+            plot_channel_response(energy, cached_results[energy], args.output_dir)
+
+        print("\nCache-only plotting completed.")
+        print(f"Cache loaded from: {cache_path}")
+        print(f"Results saved in: {args.output_dir}")
+        return
 
     all_results = {}
     all_file_results = []
@@ -788,6 +908,7 @@ def main():
     sampling_metadata["max_scanned_events"] = args.max_scanned_events
     sampling_metadata["energies"] = args.energies
     sampling_metadata["progress_every"] = args.progress_every
+    save_plot_cache(all_results, sampling_metadata, cache_path)
     with (args.output_dir / "data_sampling_metadata.json").open("w") as json_file:
         json.dump(sampling_metadata, json_file, indent=2, sort_keys=True)
         json_file.write("\n")
