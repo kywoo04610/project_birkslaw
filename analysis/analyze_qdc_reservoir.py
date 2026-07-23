@@ -175,6 +175,21 @@ def parse_arguments():
         help="Print scan progress every N input entries (default: 100000).",
     )
     parser.add_argument(
+        "--hist-bins",
+        type=int,
+        default=80,
+        help="Number of bins for the total-QDC histogram (default: 80).",
+    )
+    parser.add_argument(
+        "--hist-percentile",
+        type=float,
+        default=99.9,
+        help=(
+            "Percentile used to determine the total-QDC upper plotting "
+            "limit (default: 99.9)."
+        ),
+    )
+    parser.add_argument(
         "--cache-file",
         type=Path,
         default=None,
@@ -188,6 +203,15 @@ def parse_arguments():
         "--plot-only",
         action="store_true",
         help="Regenerate plots from --cache-file without scanning ROOT files.",
+    )
+    parser.add_argument(
+        "--plot-full-data",
+        action="store_true",
+        help=(
+            "With --plot-only, use every selected Data event stored in the "
+            "cache for the total-QDC histogram and normalize each sample to "
+            "unit total event weight."
+        ),
     )
     parser.add_argument(
         "--cache-full-data",
@@ -214,11 +238,20 @@ def parse_arguments():
     if args.progress_every <= 0:
         parser.error("--progress-every must be a positive integer")
 
+    if args.hist_bins <= 0:
+        parser.error("--hist-bins must be a positive integer")
+
+    if not 0.0 < args.hist_percentile <= 100.0:
+        parser.error("--hist-percentile must be in the interval (0, 100]")
+
     if args.cache_full_data and args.max_events < 0:
         parser.error(
             "--cache-full-data requires a positive --max-events for the "
             "comparison reservoir"
         )
+
+    if args.plot_full_data and not args.plot_only:
+        parser.error("--plot-full-data requires --plot-only")
 
     return args
 
@@ -568,28 +601,55 @@ def write_file_check_summary(file_results, output_dir):
             )
 
 
-def plot_total_us_qdc(energy, results, output_dir):
+def plot_total_us_qdc(
+    energy,
+    results,
+    output_dir,
+    use_full_data=False,
+    normalize=False,
+    hist_bins=80,
+    hist_percentile=99.9,
+):
     """Compare event-by-event total US QDC."""
 
+    plot_values = {}
+    for label, result in results.items():
+        values = result["total_us_qdc"]
+
+        if label == "Data" and use_full_data:
+            full_data = result.get("full_data")
+            if full_data is None:
+                raise RuntimeError(
+                    f"Full Data arrays are not present in the {energy} cache"
+                )
+            values = full_data["total_us_qdc"]
+
+        plot_values[label] = np.asarray(values, dtype=np.float64)
+
     nonempty = [
-        result["total_us_qdc"]
-        for result in results.values()
-        if len(result["total_us_qdc"]) > 0
+        values for values in plot_values.values() if len(values) > 0
     ]
     if not nonempty:
         print(f"  WARNING: No selected events for {energy}; skipping total-QDC plot.")
         return
 
-    all_values = np.concatenate(nonempty)
-    upper_limit = float(np.percentile(all_values, 99.5))
+    if normalize:
+        upper_limit = max(
+            float(np.percentile(values, hist_percentile))
+            for values in nonempty
+        )
+    else:
+        all_values = np.concatenate(nonempty)
+        upper_limit = float(
+            np.percentile(all_values, hist_percentile)
+        )
     if upper_limit <= 0:
         upper_limit = 1.0
 
-    bins = np.linspace(0.0, upper_limit, 41)
+    bins = np.linspace(0.0, upper_limit, hist_bins + 1)
     fig, ax = plt.subplots(figsize=(8, 6))
 
-    for label, result in results.items():
-        values = result["total_us_qdc"]
+    for label, values in plot_values.items():
         if len(values) == 0:
             continue
 
@@ -609,9 +669,15 @@ def plot_total_us_qdc(energy, results, output_dir):
         )
 
 
+        weights = (
+            np.full(len(values), 1.0 / len(values), dtype=np.float64)
+            if normalize else None
+        )
+
         ax.hist(
             values,
             bins=bins,
+            weights=weights,
             density=False,
             histtype="step",
             linewidth=2,
@@ -620,7 +686,9 @@ def plot_total_us_qdc(energy, results, output_dir):
         )
 
     ax.set_xlabel("Total US QDC per event")
-    ax.set_ylabel("Entries / bin")
+    ax.set_ylabel(
+        "Fraction of events / bin" if normalize else "Entries / bin"
+    )
     ax.set_title(f"{energy}: total Upstream MuFilter response")
     ax.legend()
     ax.grid(alpha=0.25)
@@ -1041,7 +1109,15 @@ def main():
                 raise RuntimeError(
                     f"Energy {energy} is not present in cache: {cache_path}"
                 )
-            plot_total_us_qdc(energy, cached_results[energy], args.output_dir)
+            plot_total_us_qdc(
+                energy,
+                cached_results[energy],
+                args.output_dir,
+                use_full_data=args.plot_full_data,
+                normalize=args.plot_full_data,
+                hist_bins=args.hist_bins,
+                hist_percentile=args.hist_percentile,
+            )
             plot_channel_response(energy, cached_results[energy], args.output_dir)
 
         write_full_data_summaries(cached_results, args.output_dir)
