@@ -536,7 +536,7 @@ def plot_total_us_qdc(energy, results, output_dir):
         ax.hist(
             values,
             bins=bins,
-            density=True,
+            density=False,
             histtype="step",
             linewidth=2,
             color=COLORS[label],
@@ -544,7 +544,7 @@ def plot_total_us_qdc(energy, results, output_dir):
         )
 
     ax.set_xlabel("Total US QDC per event")
-    ax.set_ylabel("Normalized events")
+    ax.set_ylabel("Entries / bin")
     ax.set_title(f"{energy}: total Upstream MuFilter response")
     ax.legend()
     ax.grid(alpha=0.25)
